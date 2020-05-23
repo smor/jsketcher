@@ -32,7 +32,7 @@ describe("Wizrds", () => {
     cy.selectRaycasting([-119, 29, 167], [23, -15, 33])
   });
 
-  it("extrube wizard should work", () => {
+  it("extrude wizard should work", () => {
     cy.getActionButton('PLANE').click();
     cy.get('.wizard').should('have.attr', 'data-operation-id', 'PLANE');
     cy.getActiveWizardField('depth').find('input').type('100');
@@ -49,9 +49,68 @@ describe("Wizrds", () => {
     cy.get('.selection-view [data-entity="face"] li').should('have.text', 'S:1/F:5');
 
   });
+  
 
-  it.only("move datum", () => {
-    createDatum();
+
+  it("Simple fillet test", () => {
+    createDatum(50, 50, 50);
+    cy.simulateClickByRayCast([-31, 70, 117], [115, 36, -15]);
+    createCylinder(50, 200, "<none>");
+    
+    cy.wait(1000);
+    cy.simulateClickByRayCast([-32, 303, 127], [30, 201, -33]);
+    //cy.wait(1000);
+    
+    createFillet(10);
+    
+    //click fillet face for test
+    cy.wait(1000);
+    cy.simulateClickFace([42, 281, 186], [20, 213, 0]);
+    
+    cy.get('.float-view-btn[data-view="selection"]').click();
+    cy.get('.selection-view [data-entity="face"] li').should('have.text', 'S:1/F:1');
+    
+  });
+  
+  
+  
+  
+  
+  it.only("more complex fillet test", () => {
+    createDatum(50, 50, 50);
+    cy.simulateClickByRayCast([-31, 70, 117], [115, 36, -15]);
+    createCylinder(50, 400, "<none>");
+    
+    cy.getActionButton('menu.views').click();
+    cy.getActionButton('StandardViewBottom').click();
+    
+    
+    createDatum(50, 50, 50);
+    cy.simulateClickByRayCast([45, -50, 47], [53, 150, 55])
+    createSphere(80, "UNION");
+    
+    
+    cy.getActionButton('menu.views').click();
+    cy.getActionButton('StandardView3Way').click();
+    
+    cy.simulateClickByRayCast([145, 174, 149], [27, 62, 33])
+    
+    createFillet(10);
+    
+    //click fillet face for test
+    //cy.wait(1000);
+    //cy.simulateClickFace([42, 281, 186], [20, 213, 0]);
+    
+    //cy.get('.float-view-btn[data-view="selection"]').click();
+    //cy.get('.selection-view [data-entity="face"] li').should('have.text', 'S:1/F:1');
+    
+  });
+
+  
+  
+
+  it("move datum", () => {
+    createDatum(50, 50, 50);
     cy.simulateClickByRayCast([10, 15, 76], [154, -25, -56]);
     cy.getMenu('datum').within(() => {
       cy.getActionButton('DATUM_ROTATE').click()
@@ -62,11 +121,63 @@ describe("Wizrds", () => {
 
 });
 
-function createDatum() {
+function createDatum(locX, locY , locZ) {
+  cy.getActionButton('DATUM_CREATE').click();
+  
+  cy.get('.wizard').should('have.attr', 'data-operation-id', 'DATUM_CREATE');
+  
+  cy.getActiveWizardField('x').find('input').clear().type(locX);
+  cy.getActiveWizardField('y').find('input').clear().type(locY);
+  cy.getActiveWizardField('z').find('input').clear().type(locZ);
 
-  cy.get('[info="originates a new datum from origin or off of a selected face"]').click();
-  cy.get('.x-Field-active > .number > input').type("100");
-
-  cy.get('.accent').click();
+  cy.get('.wizard .dialog-ok').click();
 }
 
+function createCylinder(sizeR, sizeH, boolOption){
+  
+  cy.getMenu('datum').within(() => {
+    cy.getActionButton('CYLINDER').click()
+  })
+  
+  cy.get('.wizard').should('have.attr', 'data-operation-id', 'CYLINDER');
+  
+  cy.getActiveWizardField('radius').find('input').clear().type(sizeR);
+  
+  cy.getActiveWizardField('height').find('input').clear().type(sizeH);
+  
+  cy.getActiveWizardField('boolean').find('select').select(boolOption);
+  
+  cy.get('.wizard .dialog-ok').click();
+
+}
+
+
+
+function createSphere(sizeR, boolOption){
+  
+  cy.getMenu('datum').within(() => {
+    cy.getActionButton('SPHERE').click()
+  })
+  
+  cy.get('.wizard').should('have.attr', 'data-operation-id', 'SPHERE');
+  
+  cy.getActiveWizardField('radius').find('input').clear().type(sizeR);
+  
+  cy.getActiveWizardField('boolean').find('select').select(boolOption);
+  
+  cy.get('.wizard .dialog-ok').click();
+
+}
+
+
+
+
+function createFillet(sizeR){
+  cy.getActionButton('FILLET').click();
+  
+  cy.get('.wizard').should('have.attr', 'data-operation-id', 'FILLET');
+  
+  cy.getActiveWizardField('thickness').find('input').clear().type(sizeR);
+  
+  cy.get('.wizard .dialog-ok').click();
+}

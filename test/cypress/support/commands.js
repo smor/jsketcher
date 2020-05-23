@@ -35,6 +35,17 @@ Cypress.Commands.add("simulateClickByRayCast", (from, to) => {
 
 });
 
+
+Cypress.Commands.add("simulateClickFace", (from, to) => {
+  cy.getModellerTPI().then(tpi => {
+    tpi.selectFaces(from, to);
+    tpi.__DEBUG__.AddSegment3(from, to);
+  });
+
+});
+
+
+
 Cypress.Commands.add("openSketcher", () => {
   return cy.getModellerTPI().then(tpi => tpi.openSketcher());
 });
