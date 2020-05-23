@@ -1,13 +1,13 @@
 table {
-  font-size: @font-size;
+  .mid-typography;
 }
 
 table.striped {
   & tr:nth-child(even), & th {
-    background-color: @bg-color
+    background-color: @bg-base-color
   }
   & tr:nth-child(odd) {
-    background-color: @bg-color-alt
+    background-color: @bg-color-2
   }
   & tr:hover {
     background-color: @color-highlight;
