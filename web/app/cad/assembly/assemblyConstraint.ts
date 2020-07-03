@@ -16,6 +16,8 @@ export interface AssemblyConstraintDefinition {
 
 export interface AssemblyConstraintSchema {
 
+  constants?: ConstantsDefinitions;
+
   id: string,
   name: string,
   icon?: IconType,
@@ -48,17 +50,6 @@ export abstract class AssemblyConstraint {
   }
 
   abstract apply(dof: AssemblyDOF);
-
-
-  write(): AssemblyConstraintDefinition {
-    return {
-      typeId: this.schema.id,
-
-      objects: this.objects.map(o => o.id),
-
-      constants: this.constants
-    }
-  }
 
 }
 

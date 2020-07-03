@@ -5,9 +5,6 @@ import {MVertex} from './mvertex';
 import CSys from 'math/csys';
 import {Matrix3} from "math/l3space";
 import {state, StateStream} from "lstream";
-import {AssemblyOrientationNode} from "../assembly/nodes/assemblyOrientationNode";
-import {AssemblyTranslationNode} from "../assembly/nodes/assemblyTranslationNode";
-import {AssemblyLocationNode} from "../assembly/nodes/assemblyLocationNode";
 
 export class MShell extends MObject {
 
@@ -22,20 +19,8 @@ export class MShell extends MObject {
 
   location$: StateStream<Matrix3> = state(new Matrix3());
 
-  assemblyNodes: {
-    // location: AssemblyLocationNode,
-    orientation: AssemblyOrientationNode,
-    translation: AssemblyTranslationNode,
-  };
-
   constructor() {
     super(MShell.TYPE, MObjectIdGenerator.next(MShell.TYPE, 'S'));
-    // @ts-ignore
-    this.assemblyNodes = {
-      // location: new AssemblyLocationNode(this),
-      orientation: new AssemblyOrientationNode( this, () => new Matrix3() )
-    };
-
   }
 
   traverse(callback: (obj: MObject) => void): void {

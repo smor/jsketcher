@@ -7,10 +7,6 @@ import CSys from 'math/csys';
 import {MSketchLoop} from './mloop';
 import {ProductionInfo} from './productionInfo';
 import {MBrepShell, MShell} from "./mshell";
-import {AssemblyUnitVectorNode} from "../assembly/nodes/assemblyUnitVectorNode";
-import {AssemblyScalarNode} from "../assembly/nodes/assemblyScalarNode";
-import {AssemblyVectorNode} from "../assembly/nodes/assemblyVectorNode";
-import {AssemblyPlaneNode} from "../assembly/nodes/assemblyPlaneNode";
 
 export class MFace extends MObject {
 
@@ -21,12 +17,6 @@ export class MFace extends MObject {
   sketchLoops: MSketchLoop[];
   sketch: any;
   brepFace: any;
-
-  assemblyNodes: {
-    normal: AssemblyUnitVectorNode
-    plane: AssemblyPlaneNode,
-    // w: AssemblyScalarNode
-  };
 
   private _csys: any;
   private w: number;
@@ -42,11 +32,6 @@ export class MFace extends MObject {
     this.sketchObjects = [];
     this.sketchLoops = [];
     this._csys = csys;
-    this.assemblyNodes = {
-      normal: new AssemblyUnitVectorNode(this, () => this.normal()),
-      // w: new AssemblyScalarNode(this, 'W', () => this.depth())
-      plane: new AssemblyPlaneNode(this, () => this.normal(), () => this.depth())
-    };
   }
 
   normal(): Vector {

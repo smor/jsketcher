@@ -1,12 +1,9 @@
 import {SolveStatus} from "../../sketcher/constr/AlgNumSystem";
-import {AssemblyNode} from "./assembly";
 import {MShell} from "../model/mshell";
 
 import {MObject} from "../model/mobject";
 import {CadRegistry} from "../craft/cadRegistryPlugin";
-import {RotationState, RotationState3DOF} from "./rotationState";
 import {Matrix3} from "math/l3space";
-import {TranslationState, TranslationState3DOF} from "./translationState";
 import {AssemblyConstraint, AssemblyConstraintDefinition} from "./assemblyConstraint";
 import {AssemblyConstraintsSchemas} from "./assemblySchemas";
 import {dfs} from "gems/traverse";
@@ -83,8 +80,8 @@ function buildAssemblyQueue(cadRegistry: CadRegistry, constraintDefs: AssemblyCo
     }
 
     const objects: MObject[] = [];
-    let fixedPart: MObject = null;
     let movingPart: MObject = null;
+    let fixedPart: MObject = null;
 
     for (const id of def.objects) {
       const modelObject = cadRegistry.find(id);
@@ -94,11 +91,11 @@ function buildAssemblyQueue(cadRegistry: CadRegistry, constraintDefs: AssemblyCo
       }
       objects.push(modelObject);
 
-      if (fixedPart === null) {
-        fixedPart = modelObject.root;
-      } else if (movingPart === null) {
-        if (modelObject.root !== fixedPart) {
-          movingPart = modelObject.root;
+      if (movingPart === null) {
+        movingPart = modelObject.root;
+      } else if (fixedPart === null) {
+        if (modelObject.root !== movingPart) {
+          fixedPart = modelObject.root;
         }
       } else {
         console.error('constraint may only involve two parts or less, skipping  ' + def.typeId);
@@ -120,6 +117,9 @@ function buildAssemblyQueue(cadRegistry: CadRegistry, constraintDefs: AssemblyCo
       continue;
     }
     dfs(node, (node, cb) => (graph.get(node)||[]).forEach(c => cb(c.fixedPart)), node => {
+      if (visited.has(node)) {
+        return;
+      }
       visited.add(node);
       topoOrder.push(node);
     });

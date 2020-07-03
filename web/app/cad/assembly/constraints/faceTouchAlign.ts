@@ -11,8 +11,8 @@ export class FaceTouchAlignConstraint extends AssemblyConstraint {
 
   constructor(schema: AssemblyConstraintSchema, fixedPart: MObject, movingPart: MObject, objects: MObject[]) {
     super(schema, fixedPart, movingPart, objects);
-    this.fixedFace = objects[0] as MFace;
-    this.movingFace = objects[1] as MFace;
+    this.movingFace = objects[0] as MFace;
+    this.fixedFace = objects[1] as MFace;
   }
 
   apply(dof: AssemblyDOF) {
@@ -22,8 +22,9 @@ export class FaceTouchAlignConstraint extends AssemblyConstraint {
 }
 
 export const FaceTouchAlign : AssemblyConstraintSchema = {
-  id: 'FaceAlign',
-  name: 'Face Align',
+
+  id: 'FaceTouchAlign',
+  name: 'Face Touch Align',
   icon: NoIcon,
 
   selectionMatcher: {
@@ -32,7 +33,7 @@ export const FaceTouchAlign : AssemblyConstraintSchema = {
     minQuantity: 2
   },
 
-  implementation: FaceTouchAlignConstraint,
+  implementation: FaceTouchAlignConstraint
 
 
 };
