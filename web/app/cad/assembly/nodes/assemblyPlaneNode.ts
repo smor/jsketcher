@@ -4,14 +4,13 @@ import {MObject} from "../../model/mobject";
 import {AlgNumConstraint} from "../../../sketcher/constr/ANConstraints";
 import {Constraints3D} from "../constraints3d";
 import {AssemblyNode} from "../assembly";
-import {AssemblyCSysNode} from "./assemblyCSysNode";
-import {clamp} from "../../../math/math";
 import {AssemblyLocationNode} from "./assemblyLocationNode";
 
 export class AssemblyPlaneNode extends AssemblyNode {
 
-  theta = new Param(0, 'T');
-  phi  = new Param(0, 'P');
+  x = new Param(0, 'X');
+  y = new Param(0, 'Y');
+  z = new Param(0, 'Z');
   w = new Param(0, 'W');
   getNormal: () => Vector;
   getDepth: () => number;
@@ -23,30 +22,26 @@ export class AssemblyPlaneNode extends AssemblyNode {
   }
 
   visitParams(cb) {
-    cb(this.theta);
-    cb(this.phi);
+    cb(this.x);
+    cb(this.y);
+    cb(this.z);
     cb(this.w);
   }
 
   reset() {
     const {x, y, z} = this.getNormal();
     const w = this.getDepth();
-    const phi = Math.atan2(y, x);
-    const theta = Math.acos(clamp(z, -1, 1));
-
-    this.theta.set(theta);
-    this.phi.set(phi);
-
+    this.x.set(x);
+    this.y.set(y);
+    this.z.set(z);
     this.w.set(w);
   }
 
   toNormalVector() {
-    const theta = this.theta.get();
-    const phi = this.phi.get();
     return new Vector(
-      Math.sin(theta) * Math.cos(phi),
-      Math.sin(theta) * Math.sin(phi),
-      Math.cos(theta),
+      this.x.get(),
+      this.y.get(),
+      this.z.get(),
     )
   }
 
@@ -57,9 +52,9 @@ export class AssemblyPlaneNode extends AssemblyNode {
   }
 
 
-  createOrientationRelationship(location: AssemblyLocationNode): AlgNumConstraint[] {
-    return [new AlgNumConstraint(Constraints3D.PlaneNormalLink, [location, this])];
-  }
+  // createOrientationRelationship(location: AssemblyLocationNode): AlgNumConstraint[] {
+    // return [new AlgNumConstraint(Constraints3D.PlaneNormalLink, [location, this])];
+  // }
 
   createTranslationRelationship(location: AssemblyLocationNode): AlgNumConstraint[] {
     return [new AlgNumConstraint(Constraints3D.PlaneDepthLink, [location, this])];

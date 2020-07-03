@@ -8,31 +8,49 @@ import Vector from "math/vector";
 
 export class AssemblyLocationNode extends AssemblyNode {
 
-  alpha = new Param(0, 'A');
-  beta  = new Param(0, 'B');
-  gamma  = new Param(0, 'G');
+  ix = new Param(1, 'X');
+  iy = new Param(0, 'Y');
+  iz = new Param(0, 'Z');
+  jx = new Param(0, 'X');
+  jy = new Param(1, 'Y');
+  jz = new Param(0, 'Z');
+  kx = new Param(0, 'X');
+  ky = new Param(0, 'Y');
+  kz = new Param(1, 'Z');
+
   dx = new Param(0, 'X');
   dy  = new Param(0, 'Y');
   dz  = new Param(0, 'Z');
 
-  getTransformation: () => Matrix3;
-
-  constructor(model: MObject, getTransformation: () => Matrix3) {
+  constructor(model: MObject) {
     super(model);
-    this.getTransformation = getTransformation;
   }
 
   visitParams(cb) {
-    cb(this.alpha);
-    cb(this.beta);
-    cb(this.gamma);
+    cb(this.ix);
+    cb(this.iy);
+    cb(this.iz);
+    cb(this.jx);
+    cb(this.jy);
+    cb(this.jz);
+    cb(this.kx);
+    cb(this.ky);
+    cb(this.kz);
   }
 
   reset() {
-    const mx = this.getTransformation();
-    this.alpha.set(0);
-    this.beta.set(0);
-    this.gamma.set(0);
+    this.ix.set(1);
+    this.iy.set(0);
+    this.iz.set(0);
+    this.jx.set(0);
+    this.jy.set(1);
+    this.jz.set(0);
+    this.kx.set(0);
+    this.ky.set(0);
+    this.kz.set(1);
+    this.dx.set(0);
+    this.dy.set(0);
+    this.dz.set(0);
   }
 
 
@@ -47,19 +65,26 @@ export class AssemblyLocationNode extends AssemblyNode {
   }
 
   rotationComponents(): [number, number, number, number, number, number, number, number, number] {
-
-    const alpha = this.alpha.get();
-    const beta = this.beta.get();
-    const gamma = this.gamma.get();
-
-    const cos = Math.cos;
-    const sin = Math.sin;
+    const {
+      ix, iy, iz, jx, jy, jz, kx, ky, kz
+    } = this;
 
     return [
-      cos(alpha)*cos(beta), cos(alpha)*sin(beta)*sin(gamma) - sin(alpha)*cos(gamma), cos(alpha)*sin(beta)*cos(gamma) + sin(alpha)*sin(gamma),
-      sin(alpha)*cos(beta), sin(alpha)*sin(beta)*sin(gamma) + cos(alpha)*cos(gamma), sin(alpha)*sin(beta)*cos(gamma) - cos(alpha)*sin(gamma),
-      -sin(beta), cos(beta)*sin(gamma), cos(beta)*cos(gamma)
-    ]
+      ix.get(), iy.get(), iz.get(),
+      jx.get(), jy.get(), jz.get(),
+      kx.get(), ky.get(), kz.get()
+    ];
+  }
+
+  setRotationMatrix(mx: Matrix3) {
+    const {
+      mxx, mxy, mxz,
+      myx, myy, myz,
+      mzx, mzy, mzz
+    } = mx;
+    this.ix.set(mxx); this.jx.set(mxy); this.kx.set(mxz);
+    this.iy.set(myx); this.jy.set(myy); this.ky.set(myz);
+    this.iz.set(mzx); this.jz.set(mzy); this.kz.set(mzz);
   }
 
   translationComponents(): [number, number, number] {

@@ -5,9 +5,7 @@ import {MVertex} from './mvertex';
 import CSys from 'math/csys';
 import {Matrix3} from "math/l3space";
 import {state, StateStream} from "lstream";
-import {AssemblyCSysNode} from "../assembly/nodes/assemblyCSysNode";
 import {AssemblyOrientationNode} from "../assembly/nodes/assemblyOrientationNode";
-import {AssemblyVectorNode} from "../assembly/nodes/assemblyVectorNode";
 import {AssemblyTranslationNode} from "../assembly/nodes/assemblyTranslationNode";
 import {AssemblyLocationNode} from "../assembly/nodes/assemblyLocationNode";
 
@@ -25,7 +23,7 @@ export class MShell extends MObject {
   location$: StateStream<Matrix3> = state(new Matrix3());
 
   assemblyNodes: {
-    location: AssemblyLocationNode,
+    // location: AssemblyLocationNode,
     orientation: AssemblyOrientationNode,
     translation: AssemblyTranslationNode,
   };
@@ -34,7 +32,7 @@ export class MShell extends MObject {
     super(MShell.TYPE, MObjectIdGenerator.next(MShell.TYPE, 'S'));
     // @ts-ignore
     this.assemblyNodes = {
-      location: new AssemblyLocationNode(this, () => new Matrix3() ),
+      // location: new AssemblyLocationNode(this),
       orientation: new AssemblyOrientationNode( this, () => new Matrix3() )
     };
 
@@ -49,6 +47,10 @@ export class MShell extends MObject {
 
   get parent() {
     return null;
+  }
+
+  get location() {
+    return this.location$.value;
   }
 }
 

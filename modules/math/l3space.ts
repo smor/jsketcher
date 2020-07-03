@@ -109,6 +109,13 @@ export class Matrix3 {
     return this;
   };
 
+  translateVec({x, y, z}: Vector): Matrix3 {
+    this.tx += x;
+    this.ty += y;
+    this.tz += z;
+    return this;
+  };
+
   set3(
     mxx: number, mxy: number, mxz: number,
     myx: number, myy: number, myz: number,
@@ -263,6 +270,22 @@ export class Matrix3 {
     return m;
   };
 
+  __applyNoTranslation(vector: Vector, out: Vector): Vector {
+    let x = vector.x;
+    let y = vector.y;
+    let z = vector.z;
+    out.x = this.mxx * x + this.mxy * y + this.mxz * z;
+    out.y = this.myx * x + this.myy * y + this.myz * z;
+    out.z = this.mzx * x + this.mzy * y + this.mzz * z;
+    return out;
+  };
+
+  _applyNoTranslation(vector: Vector): Vector {
+    return this.__applyNoTranslation(vector, vector);
+  };
+
+  applyNoTranslation = vector => this.__applyNoTranslation(vector, new Vector());
+
   _apply(vector: Vector): Vector {
     return this.__apply(vector, vector);
   };
@@ -308,8 +331,23 @@ export class Matrix3 {
   };
 
   static rotateMatrix(angle: number, axis: Vector, pivot: Vector, matrix: Matrix3): Matrix3 {
-    var sin = Math.sin(angle);
-    var cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const cos = Math.cos(angle);
+    return Matrix3.rotationMatrix(cos, sin, axis, pivot, matrix);
+  }
+
+  static rotationFromVectorToVector(from: Vector, to: Vector, pivot: Vector, matrix: Matrix3): Matrix3 {
+
+    const axis = from.cross(to);
+
+    const cos = from.dot(to);
+    const sin = axis.length();
+
+    return Matrix3.rotationMatrix(cos, sin, axis, pivot, matrix);
+
+  }
+
+  static rotationMatrix(cos: number, sin: number, axis: Vector, pivot: Vector, matrix: Matrix3): Matrix3 {
     var axisX, axisY, axisZ;
     var m = matrix || new Matrix3();
 
@@ -360,10 +398,11 @@ export class Matrix3 {
     this.tz = tz;
     return this;
   }
+
 }
 
 
-function BasisForPlane(normal: Vector, alignY: Vector = AXIS.Y, alignZ: Vector = AXIS.Z): [number, number, Vector] {
+function BasisForPlane(normal: Vector, alignY: Vector = AXIS.Y, alignZ: Vector = AXIS.Z): [Vector, Vector, Vector] {
   let alignPlane, x, y;
   if (Math.abs(normal.dot(alignY)) < 0.5) {
     alignPlane = normal.cross(alignY);
@@ -374,5 +413,7 @@ function BasisForPlane(normal: Vector, alignY: Vector = AXIS.Y, alignZ: Vector =
   x = y.cross(normal);
   return [x, y, normal];
 }
+
+export const IDENTITY_MATRIX = Object.freeze(new Matrix3());
 
 export {ORIGIN, IDENTITY_BASIS, AXIS, BasisForPlane};

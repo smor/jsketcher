@@ -2,7 +2,7 @@ import {Param} from "../../../sketcher/shapes/param";
 import {Matrix3} from "math/l3space";
 import {MObject} from "../../model/mobject";
 import {AlgNumConstraint} from "../../../sketcher/constr/ANConstraints";
-import {Constraints3D} from "../constraints3d";
+// import {Constraints3D} from "../constraints3d";
 import {AssemblyNode} from "../assembly";
 
 export class AssemblyOrientationNode extends AssemblyNode {

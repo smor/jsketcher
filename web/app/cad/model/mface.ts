@@ -1,6 +1,6 @@
 import {MObject} from './mobject';
 import Vector from 'math/vector';
-import {BasisForPlane} from 'math/l3space';
+import {Basis, BasisForPlane} from 'math/l3space';
 import {MSketchObject} from './msketchObject';
 import {EMPTY_ARRAY} from 'gems/iterables';
 import CSys from 'math/csys';
@@ -58,19 +58,19 @@ export class MFace extends MObject {
     return this.w;
   }
 
-  basis() {
+  basis(): Basis {
     if (!this._basis) {
       this._basis = [this.csys.x, this.csys.y, this.csys.z];
     }
     return this._basis;
   }
 
-  get csys() {
+  get csys(): CSys {
     this.evalCSys();
     return this._csys;
   }
 
-  get isPlaneBased() {
+  get isPlaneBased(): boolean {
     return this.surface.simpleSurface && this.surface.simpleSurface.isPlane;
   }
   
