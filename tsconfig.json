@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES5",
+    "target": "ES2015",
     "baseUrl": ".",
     "downlevelIteration": true,
     "paths": {

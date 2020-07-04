@@ -7,6 +7,7 @@ import CSys from 'math/csys';
 import {MSketchLoop} from './mloop';
 import {ProductionInfo} from './productionInfo';
 import {MBrepShell, MShell} from "./mshell";
+import BBox from "../../math/bbox";
 
 export class MFace extends MObject {
 
@@ -174,6 +175,8 @@ export class MFace extends MObject {
 
 export class MBrepFace extends MFace {
 
+  #middlePoint: Vector;
+
   constructor(id, shell, brepFace) {
     super(id, shell, brepFace.surface);
     this.id = id;
@@ -197,5 +200,22 @@ export class MBrepFace extends MFace {
       bounds.push(loop.asPolygon().map(p => new Vector().setV(p)));
     }
     return bounds;
+  }
+
+  get middlePoint() {
+    if (!this.#middlePoint) {
+      const bbox = new BBox();
+      const outerPoly = this.brepFace.outerLoop.asPolygon;
+      if (outerPoly) {
+        outerPoly.forEach(pt => {
+          const pt2d = this.csys.outTransformation.apply(pt);
+          bbox.checkPoint(pt2d);
+        });
+        this.#middlePoint = this.csys.inTransformation.apply(bbox.center());
+      } else {
+        this.#middlePoint = this.surface.pointInMiddle;
+      }
+    }
+    return this.#middlePoint;
   }
 }

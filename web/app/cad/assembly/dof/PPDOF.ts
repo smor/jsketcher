@@ -1,3 +1,4 @@
+import { Plane } from './../../../brep/geom/impl/plane';
 import {AssemblyDOF, ModificationResponse} from "./assemblyDOF";
 import Vector from "math/vector";
 import {Matrix3, ORIGIN} from "math/l3space";
@@ -8,10 +9,11 @@ export class PPDOF implements AssemblyDOF {
 
 
   translationPlane: Plane;
-  rotationAxis: Plane;
+  rotationAxis: Vector;
 
-  constructor(translationPlane: Plane) {
+  constructor(translationPlane: Plane, rotationAxis: Vector) {
     this.translationPlane = translationPlane;
+    this.rotationAxis = rotationAxis;
   }
 
 
