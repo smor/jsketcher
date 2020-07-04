@@ -3,20 +3,21 @@ import {MObject} from "../../model/mobject";
 import {NoIcon} from "../../../sketcher/icons/NoIcon";
 import {AssemblyDOF} from "../dof/assemblyDOF";
 import {MFace} from "../../model/mface";
+import { MShell } from "../../model/mshell";
 
 export class FaceTouchAlignConstraint extends AssemblyConstraint {
 
   fixedFace: MFace;
   movingFace: MFace;
 
-  constructor(schema: AssemblyConstraintSchema, fixedPart: MObject, movingPart: MObject, objects: MObject[]) {
+  constructor(schema: AssemblyConstraintSchema, fixedPart: MShell, movingPart: MShell, objects: MObject[]) {
     super(schema, fixedPart, movingPart, objects);
     this.movingFace = objects[0] as MFace;
     this.fixedFace = objects[1] as MFace;
   }
 
   apply(dof: AssemblyDOF) {
-    dof.applyTouchAlign(this);
+    return dof.applyTouchAlign(this);
   }
 
 }

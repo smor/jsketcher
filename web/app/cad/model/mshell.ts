@@ -13,7 +13,7 @@ export class MShell extends MObject {
   csys: CSys;
 
   shell;
-  faces = [];
+  faces = []; 
   edges = [];
   vertices = [];
 

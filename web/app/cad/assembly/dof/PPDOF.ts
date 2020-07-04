@@ -1,24 +1,64 @@
-import { Plane } from './../../../brep/geom/impl/plane';
-import {AssemblyDOF, ModificationResponse} from "./assemblyDOF";
-import Vector from "math/vector";
 import {Matrix3, ORIGIN} from "math/l3space";
-import {FaceTouchAlignConstraint} from "../constraints/faceTouchAlign";
+import Vector from "math/vector";
 import {eqTol} from "../../../brep/geom/tolerance";
+import {FaceTouchAlignConstraint} from "../constraints/faceTouchAlign";
+import {Plane} from './../../../brep/geom/impl/plane';
+import {AssemblyDOF, ModificationResponse} from "./assemblyDOF";
+import {areEqual, clamp, DEG_RAD} from "../../../math/math";
+import {ConflictDOF} from "./conflictDOF";
+
+const ANGULAR_ALLOWANCE = 10 * DEG_RAD;
 
 export class PPDOF implements AssemblyDOF {
 
+  description = 'plane to plane';
 
-  translationPlane: Plane;
-  rotationAxis: Vector;
+  plane: Plane;
 
-  constructor(translationPlane: Plane, rotationAxis: Vector) {
-    this.translationPlane = translationPlane;
-    this.rotationAxis = rotationAxis;
+  constructor(plane: Plane) {
+    this.plane = plane;
   }
 
 
   applyTouchAlign(constr: FaceTouchAlignConstraint): AssemblyDOF {
 
+    const rotationAxis = this.plane.normal;
+
+    const vecA = constr.movingPart.location.applyNoTranslation(constr.movingFace.normal()).normalize();
+    const vecB = constr.fixedPart.location.applyNoTranslation(constr.fixedFace.normal())._negate().normalize();
+
+    const cosA = clamp(rotationAxis.dot(vecA), -1, 1);
+    const cosB = clamp(rotationAxis.dot(vecB), -1, 1);
+    const sinA = clamp(rotationAxis.cross(vecA).length(), -1, 1);
+    const sinB = clamp(rotationAxis.cross(vecB).length(), -1, 1);
+
+    const angA = Math.atan2(sinA, cosA);
+    const angB = Math.atan2(sinB, cosB);
+
+    // it's not a tolerance
+    if (!areEqual(angA, angB, ANGULAR_ALLOWANCE)) {
+      console.log('constraint conflict');
+      return new ConflictDOF(constr, 'unable to align faces with not matching angles with respect to plane to plane align degree of freedom');
+    }  
+
+    const location = constr.movingPart.root.location;
+
+    const rot = new Matrix3();
+
+    Matrix3.rotationFromVectorToVector(vecA, vecB,  ORIGIN, rot);
+
+    rot.combine3x3(location, location);
+
+    const ptMoving = constr.movingPart.location.apply(constr.movingFace.csys.origin);
+    const ptFixed = constr.fixedPart.location.apply(constr.fixedFace.csys.origin);
+
+
+    const wA = vecB.dot(ptMoving);
+    const wB = vecB.dot(ptFixed);
+
+    const dir = vecB.multiply(wB - wA);
+
+    location.translateVec(dir);
 
     return this;
   }
@@ -29,7 +69,7 @@ export class PPDOF implements AssemblyDOF {
 
   translate(dir: Vector, location: Matrix3, strict: boolean): ModificationResponse {
 
-    const normal = this.translationPlane.normal;
+    const normal = this.plane.normal;
     const illegalTranslation = !eqTol(normal.dot(dir), 0);
     if (illegalTranslation && strict) {
       return ModificationResponse.REJECTED;

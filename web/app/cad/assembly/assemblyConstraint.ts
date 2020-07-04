@@ -1,8 +1,8 @@
-import {CoreContext} from "context";
 import {ConstantsDefinitions} from "../../sketcher/constr/ANConstraints";
 import {IconType} from "react-icons";
 import {MObject} from "../model/mobject";
 import {AssemblyDOF} from "./dof/assemblyDOF";
+import { MShell } from "../model/mshell";
 
 export interface AssemblyConstraintDefinition {
 
@@ -35,14 +35,14 @@ export abstract class AssemblyConstraint {
 
   schema: AssemblyConstraintSchema;
 
-  fixedPart: MObject;
-  movingPart: MObject;
+  fixedPart: MShell;
+  movingPart: MShell;
 
   objects: MObject[];
 
   constants: ConstantsDefinitions = {};
 
-  protected constructor(schema: AssemblyConstraintSchema, fixedPart: MObject, movingPart: MObject, objects: MObject[]) {
+  protected constructor(schema: AssemblyConstraintSchema, fixedPart: MShell, movingPart: MShell, objects: MObject[]) {
     this.schema = schema;
     this.fixedPart = fixedPart;
     this.movingPart = movingPart;

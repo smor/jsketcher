@@ -270,6 +270,37 @@ export class Matrix3 {
     return m;
   };
 
+  combine3x3(transform: Matrix3, out?: Matrix3): Matrix3 {
+    var txx = transform.mxx;
+    var txy = transform.mxy;
+    var txz = transform.mxz;
+    
+    var tyx = transform.myx;
+    var tyy = transform.myy;
+    var tyz = transform.myz;
+    
+    var tzx = transform.mzx;
+    var tzy = transform.mzy;
+    var tzz = transform.mzz;
+    
+
+    var m = out || new Matrix3();
+    m.mxx = (this.mxx * txx + this.mxy * tyx + this.mxz * tzx);
+    m.mxy = (this.mxx * txy + this.mxy * tyy + this.mxz * tzy);
+    m.mxz = (this.mxx * txz + this.mxy * tyz + this.mxz * tzz);
+    
+    m.myx = (this.myx * txx + this.myy * tyx + this.myz * tzx);
+    m.myy = (this.myx * txy + this.myy * tyy + this.myz * tzy);
+    m.myz = (this.myx * txz + this.myy * tyz + this.myz * tzz);
+    
+    m.mzx = (this.mzx * txx + this.mzy * tyx + this.mzz * tzx);
+    m.mzy = (this.mzx * txy + this.mzy * tyy + this.mzz * tzy);
+    m.mzz = (this.mzx * txz + this.mzy * tyz + this.mzz * tzz);
+    
+
+    return m;
+  };
+
   __applyNoTranslation(vector: Vector, out: Vector): Vector {
     let x = vector.x;
     let y = vector.y;

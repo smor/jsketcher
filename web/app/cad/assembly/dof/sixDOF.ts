@@ -1,3 +1,4 @@
+import { Plane } from './../../../brep/geom/impl/plane';
 import {AssemblyDOF, ModificationResponse} from "./assemblyDOF";
 import Vector from "math/vector";
 import {Matrix3, ORIGIN} from "math/l3space";
@@ -6,23 +7,25 @@ import {PPDOF} from "./PPDOF";
 
 export class SixDOF implements AssemblyDOF {
 
+  description = 'full freedom';
+
   applyTouchAlign(constr: FaceTouchAlignConstraint): AssemblyDOF {
 
-    const vecA = constr.movingFace.normal();
-    const vecB = constr.fixedFace.root.location._applyNoTranslation(constr.fixedFace.normal()).negate();
+    const vecA = constr.movingPart.location.applyNoTranslation(constr.movingFace.normal());
+    const vecB = constr.fixedPart.location.applyNoTranslation(constr.fixedFace.normal())._negate();
 
     const location = constr.movingPart.root.location;
 
     Matrix3.rotationFromVectorToVector(vecA, vecB, ORIGIN, location);
 
-    const ptFixed = constr.fixedFace.root.location.apply(constr.fixedFace.csys.origin);
-    const ptMoving = constr.movingFace.root.location.apply(constr.movingFace.csys.origin);
+    const ptFixed = constr.fixedPart.location.apply(constr.fixedFace.favorablePoint);
+    const ptMoving = constr.movingPart.location.apply(constr.movingFace.favorablePoint);
 
     const dir = ptFixed._minus(ptMoving);
 
     location.translate(dir.x, dir.y, dir.z);
 
-    return new PPDOF();
+    return new PPDOF(new Plane(vecB.copy(), vecB.dot(ptFixed)));
   }
 
   rotate(axis: Vector, angle: number, location: Matrix3, strict: boolean): ModificationResponse {

@@ -11,6 +11,8 @@ export enum ModificationResponse {
 
 export interface AssemblyDOF {
 
+  description: string;
+
   applyTouchAlign(constr: FaceTouchAlignConstraint): AssemblyDOF;
 
   translate(dir: Vector, location: Matrix3, strict: boolean): ModificationResponse;

@@ -171,11 +171,14 @@ export class MFace extends MObject {
     return this.shell;
   }
 
+  get favorablePoint() {
+    return this.csys.origin;    
+  }
 }
 
 export class MBrepFace extends MFace {
 
-  #middlePoint: Vector;
+  #favorablePoint: Vector;
 
   constructor(id, shell, brepFace) {
     super(id, shell, brepFace.surface);
@@ -202,20 +205,20 @@ export class MBrepFace extends MFace {
     return bounds;
   }
 
-  get middlePoint() {
-    if (!this.#middlePoint) {
+  get favorablePoint() {
+    if (!this.#favorablePoint) {
       const bbox = new BBox();
-      const outerPoly = this.brepFace.outerLoop.asPolygon;
+      const outerPoly = this.brepFace.outerLoop.asPolygon();
       if (outerPoly) {
         outerPoly.forEach(pt => {
           const pt2d = this.csys.outTransformation.apply(pt);
           bbox.checkPoint(pt2d);
         });
-        this.#middlePoint = this.csys.inTransformation.apply(bbox.center());
+        this.#favorablePoint = this.csys.inTransformation.apply(bbox.center());
       } else {
-        this.#middlePoint = this.surface.pointInMiddle;
+        this.#favorablePoint = this.surface.pointInMiddle;
       }
     }
-    return this.#middlePoint;
+    return this.#favorablePoint;
   }
 }

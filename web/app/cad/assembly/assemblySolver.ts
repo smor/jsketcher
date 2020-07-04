@@ -1,6 +1,5 @@
 import {SolveStatus} from "../../sketcher/constr/AlgNumSystem";
 import {MShell} from "../model/mshell";
-
 import {MObject} from "../model/mobject";
 import {CadRegistry} from "../craft/cadRegistryPlugin";
 import {Matrix3} from "math/l3space";
@@ -10,9 +9,19 @@ import {dfs} from "gems/traverse";
 import {SixDOF} from "./dof/sixDOF";
 import {AssemblyDOF} from "./dof/assemblyDOF";
 
+declare module '../model/mshell' {
+  
+  interface MShell {
+
+    assemblyDOF: AssemblyDOF;  
+
+  }
+
+}
+
 export interface RigidBody {
 
-  model: MObject;
+  model: MShell;
 
   constraints;
 
@@ -35,7 +44,10 @@ export class AssemblyProcess {
   }
 
   begin() {
-    this.cadRegistry.getAllShells().forEach(s => s.location$.mutate(l => l.reset()));
+    this.cadRegistry.getAllShells().forEach(s => {
+      s.location$.mutate(l => l.reset());
+      s.assemblyDOF = new SixDOF();
+    });
   }
 
   step() {
@@ -111,7 +123,7 @@ function buildAssemblyQueue(cadRegistry: CadRegistry, constraintDefs: AssemblyCo
   });
 
   const visited = new Set<MObject>();
-  const topoOrder = [];
+  const topoOrder: MShell[] = [];
   for (let node of graph.keys()) {
     if (visited.has(node)) {
       continue;
@@ -207,17 +219,11 @@ export function launchAssembly(assemblyProcess: AssemblyProcess): void {
 
 }
 
-function solve(constraints: AssemblyConstraint[], freeBody: MObject, location: Matrix3): SolveStatus {
-
-  if (!(freeBody instanceof MShell)) {
-    throw 'unsupported: needs location implementation';
-  }
-
-  let dof: AssemblyDOF = new SixDOF();
+function solve(constraints: AssemblyConstraint[], freeBody: MShell, location: Matrix3): SolveStatus {
 
   for (let constr of constraints) {
 
-    dof = constr.apply(dof);
+    freeBody.assemblyDOF = constr.apply(freeBody.assemblyDOF);
 
   }
 
