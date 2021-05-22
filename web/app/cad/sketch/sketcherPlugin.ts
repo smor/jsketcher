@@ -102,7 +102,7 @@ export function activate(ctx) {
         viewer.parametricManager.externalConstantResolver = ctx.expressionService.evaluateExpression;
         // viewer.historyManager.init(savedSketch);
         viewer.io._loadSketch(sketch);
-        IO.exportTextData(viewer.io.dxfExport(), ctx.projectService.id + "_" + sketchId + ".dxf");
+        IO.exportTextData(viewer.io.svgExport(), ctx.projectService.id + "_" + sketchId + ".svg");
         Generator.resetIDGenerator();
       } catch (e) {
         console.error(e);

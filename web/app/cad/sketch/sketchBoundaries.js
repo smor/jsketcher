@@ -11,7 +11,7 @@ export function getSketchBoundaries(sceneFace) {
   const boundary = {lines: [], arcs: [], circles: [], nurbses: []};
   let w2sTr = sceneFace.worldToSketchTransformation;
   let _w2sTrArr = null;
-  let w2sTrArr = () => _w2sTrArr || (_w2sTrArr = w2sTr.toArray()); 
+  let w2sTrArr = () => _w2sTrArr || (_w2sTrArr = w2sTr.toArray());
   if (!sceneFace.brepFace) {
     return boundary;
   }
@@ -34,12 +34,11 @@ export function getSketchBoundaries(sceneFace) {
         let mmA = vec.normalize(DDA);
 
         let orient = mA[0] * mmA[1] - mA[1] * mmA[0];
-
         let k = orient < 0 ? -1 : 1;
+        let centripetal = perpXY(vec.mul(mA, k * arcRadius));
+        let c = vec._add(centripetal, A);
 
         if (veqXYZ(A[0], A[1], 0, B[0], B[1], 0)) {
-          let centripetal = perpXY(vec.mul(mA, k * arcRadius));
-          let c = vec._add(centripetal, A);
           boundary.circles.push({
             id,
             c: {x: c[0], y: c[1]},
@@ -48,18 +47,18 @@ export function getSketchBoundaries(sceneFace) {
           continue;
         }
 
-        let centripetalB = vec.normalize(DB);
-        perpXY(centripetalB);
+        if (orient < 0) {
+          let t;
+          t = B;
+          B = A;
+          A = t;
+        }
 
-        let proj = vec.dot(mA, vec.sub(A, B));
-        let u = proj / vec.dot(mA, centripetalB);
-
-        let C = vec._add(vec._mul(centripetalB, u), B);
         boundary.arcs.push({
           id,
           a: {x: A[0], y: A[1]},
           b: {x: B[0], y: B[1]},
-          c: {x: C[0], y: C[1]}
+          c: {x: c[0], y: c[1]},
         });
       } else {
         const data = curve.transform(w2sTrArr()).serialize();

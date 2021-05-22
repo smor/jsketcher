@@ -4,6 +4,7 @@ import {Segment} from './segment'
 import * as draw_utils from '../shapes/draw-utils'
 import {isPointInsidePolygon, polygonOffset, ConvexHull2D} from "geom/euclidean";
 import Vector from "math/vector";
+import NurbsCurve from 'geom/curves/nurbsCurve';
 
 
 export class BezierCurve extends SketchObject {
@@ -11,7 +12,7 @@ export class BezierCurve extends SketchObject {
   constructor(ax, ay, cp1x, cp1y, cp2x, cp2y, bx, by, id) {
     super(id);
     const s1 = new Segment(ax, ay, cp1x, cp1y, this.id + ':1');
-    const s2 = new Segment(bx, by, cp2x, cp2y, this.id + ':2');
+    const s2 = new Segment(cp2x, cp2y, bx, by, this.id + ':2');
     this.addChild(s1);
     this.addChild(s2);
 
@@ -101,6 +102,13 @@ export class BezierCurve extends SketchObject {
       cp3: this.cp2.write(),
       cp4: this.b.write()
     };
+  }
+
+
+  asNurbs() {
+    return new NurbsCurve(new verb.geom.BezierCurve(
+      [this.p0, this.p1, this.p2, this.p3].map(p => [p.x, p.y, 0])
+    ));
   }
 
   static read(id, data) {

@@ -22,6 +22,8 @@ import {SketchGenerator} from "./generators/sketchGenerator";
 import {BoundaryGeneratorSchema} from "./generators/boundaryGenerator";
 import {SketchTypes} from "./shapes/sketch-types";
 import {SketchObject} from "./shapes/sketch-object";
+import { NurbsSerializaionFormat } from 'geom/curves/nurbsCurve'
+import CubicHermiteInterpolation from 'geom/curves/cubicHermiteIntepolation'
 
 export interface SketchFormat_V3 {
 
@@ -345,6 +347,30 @@ export class IO {
           out.fline('<path d="M $ $ A $ $ 0 $ $ $ $" />', [obj.a.x, obj.a.y, r, r, dir, 1, obj.b.x, obj.b.y]);
         } else if (obj._class === T.CIRCLE) {
           out.fline('<circle cx="$" cy="$" r="$" />', [obj.c.x, obj.c.y, obj.r.get()]);
+        } else if (obj._class === T.NURBS) {
+          const nurbsData = obj.curve.serialize();
+          const points = [];
+          const tangents = [];
+          obj.curve.knots().forEach(k => {
+            const [pt, tan] = obj.curve.eval(k, 1)
+            points.push(pt);
+            tangents.push(tan);
+          })
+          const iCurve = new CubicHermiteInterpolation(points, tangents);
+          iCurve.beziers.forEach(obj => {
+                    out.fline('<path d="M $ $ C $ $, $ $, $ $" />', [obj.p0[0], obj.p0[1],
+                                                                     obj.p1[0], obj.p1[1],
+                                                                     obj.p2[0], obj.p2[1],
+                                                                     obj.p3[0], obj.p3[1]]);
+
+          })
+
+        } else if (obj._class === T.BEZIER) {
+
+          out.fline('<path d="M $ $ C $ $, $ $, $ $" />', [obj.p0.x, obj.p0.y,
+                                                           obj.p1.x, obj.p1.y,
+                                                           obj.p2.x, obj.p2.y,
+                                                           obj.p3.x, obj.p3.y]);
 //      } else if (obj._class === T.DIM || obj._class === T.HDIM || obj._class === T.VDIM) {
         }
       }
@@ -419,6 +445,46 @@ export class IO {
     out.line("SECTION");
     out.line("2");
     out.line("BLOCKS");
+
+    out.line("0");
+    out.line("BLOCK");
+    out.line("  5");
+    out.line("20");
+    out.line("330");
+    out.line("1F");
+    out.line("100");
+    out.line("AcDbEntity");
+    out.line("  8");
+    out.line("0");
+    out.line("100");
+    out.line("AcDbBlockBegin");
+    out.line("  2");
+    out.line("*Model_Space");
+    out.line(" 70");
+    out.line("    0");
+    out.line(" 10");
+    out.line("0");
+    out.line(" 20");
+    out.line("0");
+    out.line(" 30");
+    out.line("0");
+    out.line("  3");
+    out.line("*Model_Space");
+    out.line("  1");
+    
+    out.line("0");
+    out.line("ENDBLK");
+    out.line("  5");
+    out.line("21");
+    out.line("330");
+    out.line("1F");
+    out.line("100");
+    out.line("AcDbEntity");
+    out.line("  8");
+    out.line("0");
+    out.line("100");
+    out.line("AcDbBlockEnd");
+
     out.line("0");
     out.line("ENDSEC");
     out.line("0");
@@ -491,7 +557,20 @@ export class IO {
           out.line("0");
           out.line("40");
           out.numberln(obj.r.get());
-//      } else if (obj._class === T.DIM || obj._class === T.HDIM || obj._class === T.VDIM) {
+        } else if (obj._class === T.BEZIER) {
+          debugger;
+          const nurbsData = obj.asNurbs().serialize();
+          nurbsToDXF(nurbsData, out);
+        } else if (obj._class === T.NURBS) {
+          const nurbsData = obj.curve.serialize();
+          nurbsToDXF(nurbsData, out);
+            out.line(nurbsData.degree);
+            out.line("72");
+            out.line(nurbsData.knots.length);
+            out.line("73");
+            out.line(nurbsData.cp.length);
+
+          //      } else if (obj._class === T.DIM || obj._class === T.HDIM || obj._class === T.VDIM) {
         }
       }
     }
@@ -502,6 +581,47 @@ export class IO {
     out.line("EOF");
     return out.data;
   };
+}
+
+function nurbsToDXF(nurbsData: NurbsSerializaionFormat,  out: any) {
+  out.line("0");
+  out.line("SPLINE");
+  out.line("  5");
+  out.line("50");
+  out.line("100");
+  out.line("AcDbSpline");
+  out.line("70");
+  out.line(4);
+  out.line("71");
+  out.line(nurbsData.degree);
+  out.line("72");
+  out.line(nurbsData.knots.length);
+  out.line("73");
+  out.line(nurbsData.cp.length);
+
+  nurbsData.knots.forEach(k => {
+    out.line("40");
+    out.numberln(k);
+  });
+
+  for (let i = 0; i < nurbsData.cp.length; ++i) {
+    
+    const [x, y, z] = nurbsData.cp[i];
+    const w = nurbsData.weights[i];
+
+    out.line("10");
+    out.numberln(x);
+
+    out.line("20");
+    out.numberln(y);
+
+    out.line("30");
+    out.numberln(z);
+
+    out.line("41");
+    out.numberln(w);
+  }    
+
 }
 
 function _format(str, args) {

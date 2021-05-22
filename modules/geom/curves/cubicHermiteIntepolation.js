@@ -13,8 +13,8 @@ export default function CubicHermiteInterpolation(points, tangents) {
     let tangent1 = tangents[i - 1];
     let tangent2 = tangents[i];
     let length = vec.length(vec.sub(p3, p0)) * 0.5;
-    let p1 = vec.add(p0, vec.mul(tangent1, length));
-    let p2 = vec.sub(p3, vec.mul(tangent2, length));
+    let p1 = vec.add(p0, vec.mul(tangent1, length / vec.length(tangent1)));
+    let p2 = vec.sub(p3, vec.mul(tangent2, length / vec.length(tangent2)));
     beziers.push({p0, p1, p2, p3});
   }
 
@@ -81,6 +81,7 @@ export default function CubicHermiteInterpolation(points, tangents) {
     transform,
     knots: () => knots,
     invert,
-    points, tangents
+    points, tangents,
+    beziers
   });
 }

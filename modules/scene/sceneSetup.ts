@@ -75,7 +75,7 @@ export default class SceneSetUp {
     this.createOrthographicCamera();
     this.createPerspectiveCamera();
 
-    this.camera = this.pCamera;
+    this.camera = this.oCamera;
     
     this.light = new PointLight( 0xffffff);
     this.light.position.set( 10, 10, 10 );
@@ -155,7 +155,7 @@ export default class SceneSetUp {
     // }, false );
     trackballControls.rotateSpeed = 3.8;
     trackballControls.zoomSpeed = 1.2;
-    trackballControls.panSpeed = 0.8;
+    trackballControls.panSpeed = 2;
 
     trackballControls.noZoom = false;
     trackballControls.noPan = false;

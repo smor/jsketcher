@@ -11,9 +11,9 @@ export class NurbsObject extends SketchObject {
   constructor(curve, id) {
     super(id);
     this.curve = curve;
-    let cp = curve.data.controlPoints;
-    this.a = new EndPoint(cp[0].x, cp[0].y, this.id + ":A");
-    this.b = new EndPoint(cp[cp.length - 1].x, cp[cp.length - 1].y, this.id + ":B");
+    let cp = curve.serialize().cp;
+    this.a = new EndPoint(cp[0][0], cp[0][1], this.id + ":A");
+    this.b = new EndPoint(cp[cp.length - 1][0], cp[cp.length - 1][1], this.id + ":B");
     this.bezierPieces = this.calcBezierPiecewise();
   }
 
